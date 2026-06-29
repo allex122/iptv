@@ -369,6 +369,9 @@ export default function WatchPage() {
                   </p>
                 )}
               </div>
+
+              {/* Smaller Sponsor Box (160x200 Ad) */}
+              <AdPlaceholder type="square" className="mt-6" />
             </div>
 
           </div>
