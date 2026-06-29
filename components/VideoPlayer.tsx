@@ -34,9 +34,11 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
     // Reset video state
     video.pause();
 
-    // Auto-detect secure context and wrap insecure HTTP stream requests in our server proxy
+    // Wrap insecure HTTP requests in proxy, EXCEPT for private local LAN IPs which cloud serverless cannot reach
     let finalUrl = url;
-    if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+    const isPrivateIP = url.includes('//10.') || url.includes('//192.168.') || url.includes('//172.') || url.includes('localhost') || url.includes('127.0.0.1');
+    
+    if (window.location.protocol === 'https:' && url.startsWith('http://') && !isPrivateIP) {
       finalUrl = `/api/stream-proxy?url=${encodeURIComponent(url)}`;
     }
 

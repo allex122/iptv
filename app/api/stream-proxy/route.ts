@@ -20,6 +20,8 @@ export async function GET(request: Request) {
     }
 
     const contentType = res.headers.get('content-type') || '';
+    const urlObj = new URL(streamUrl);
+    const queryString = urlObj.search; // Extract the query string containing token/auth data
 
     // If it's a playlist manifest (.m3u8), parse and rewrite segment URLs to also route through this proxy
     if (contentType.includes('mpegurl') || contentType.includes('x-mpegURL') || streamUrl.split('?')[0].endsWith('.m3u8')) {
@@ -31,7 +33,13 @@ export async function GET(request: Request) {
         const trimmed = line.trim();
         if (trimmed && !trimmed.startsWith('#')) {
           // Construct absolute URL for relative links
-          const absoluteUrl = trimmed.startsWith('http') ? trimmed : `${baseUrl}${trimmed}`;
+          let absoluteUrl = trimmed.startsWith('http') ? trimmed : `${baseUrl}${trimmed}`;
+          
+          // Append the original query string (like authentication tokens) to segment requests
+          if (queryString && !absoluteUrl.includes('?')) {
+            absoluteUrl += queryString;
+          }
+          
           // Route the segment/sub-playlist through our proxy
           return `/api/stream-proxy?url=${encodeURIComponent(absoluteUrl)}`;
         }
