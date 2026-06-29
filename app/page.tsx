@@ -145,6 +145,38 @@ export default function Home() {
           </div>
         </section>
 
+        {/* FIFA WORLD CUP 2026 FEATURED TOURNAMENT HUB */}
+        {(() => {
+          const worldCupMatches = filteredMatches.filter(
+            (match) => match.league.toLowerCase().includes('fifa') || match.league.toLowerCase().includes('world cup')
+          );
+          if (worldCupMatches.length === 0) return null;
+          return (
+            <section className="mb-8 bg-[#12141a] border border-amber-500/20 rounded-3xl p-5 md:p-6 relative overflow-hidden shadow-2xl">
+              {/* Gold Ambient Glow Background Accent */}
+              <div className="absolute right-0 top-0 w-72 h-72 rounded-full bg-amber-500/5 blur-[80px] pointer-events-none"></div>
+              
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-sm font-black text-white uppercase tracking-tight flex items-center space-x-2">
+                  <span className="text-amber-500">🏆</span>
+                  <span className="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">
+                    FIFA World Cup 2026 Hub
+                  </span>
+                </h2>
+                <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-md font-black uppercase tracking-wider">
+                  Featured Matches
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {worldCupMatches.map((match) => (
+                  <MatchCard key={match.id} match={match} />
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
         {/* Matches Grid Dashboard */}
         <section className="mb-10">
           <div className="flex items-center justify-between mb-6">
