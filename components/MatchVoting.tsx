@@ -6,11 +6,28 @@ interface MatchVotingProps {
   matchId: string;
   homeTeam: string;
   awayTeam: string;
+  status: 'LIVE' | 'UPCOMING' | 'FINISHED';
+  scores?: { home: number; away: number };
 }
 
-export default function MatchVoting({ matchId, homeTeam, awayTeam }: MatchVotingProps) {
+const PRIZES = [
+  { code: 'VIP-FREE-7DAYS', desc: '7 Days Free Premium VIP Pass (Ad-Free HD Streams)' },
+  { code: 'CYBER-50OFF', desc: '50% Discount Coupon for Cyber2 Shop' },
+  { code: 'WINNER-GOLD-30', desc: 'Gold Ticket Access code to Premium Channels' },
+  { code: 'NFT-CARD-CLAIM', desc: 'Exclusive Winner Digital Badge NFT' }
+];
+
+export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initialStatus, scores }: MatchVotingProps) {
   const [votedOption, setVotedOption] = useState<'home' | 'draw' | 'away' | null>(null);
   const [voteData, setVoteData] = useState({ home: 0, draw: 0, away: 0 });
+  const [currentStatus, setCurrentStatus] = useState(initialStatus);
+  const [prize, setPrize] = useState<{ code: string; desc: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  // Sync status on load
+  useEffect(() => {
+    setCurrentStatus(initialStatus);
+  }, [initialStatus]);
 
   // Generate deterministic seed votes based on matchId
   useEffect(() => {
@@ -18,9 +35,9 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam }: MatchVoting
     for (let i = 0; i < matchId.length; i++) {
       hash = matchId.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const seedHome = Math.abs((hash % 45) + 30); // 30 - 75
-    const seedAway = Math.abs(((hash >> 2) % 35) + 20); // 20 - 55
-    const seedDraw = Math.abs(((hash >> 4) % 15) + 5); // 5 - 20
+    const seedHome = Math.abs((hash % 45) + 30);
+    const seedAway = Math.abs(((hash >> 2) % 35) + 20);
+    const seedDraw = Math.abs(((hash >> 4) % 15) + 5);
 
     // Retrieve previous user vote from localStorage
     const savedVote = localStorage.getItem(`cyber2-vote-${matchId}`);
@@ -31,13 +48,20 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam }: MatchVoting
         draw: seedDraw + (savedVote === 'draw' ? 1 : 0),
         away: seedAway + (savedVote === 'away' ? 1 : 0)
       });
+
+      // Retrieve saved prize if already unlocked
+      const savedPrizeCode = localStorage.getItem(`cyber2-prize-${matchId}`);
+      if (savedPrizeCode) {
+        const found = PRIZES.find(p => p.code === savedPrizeCode);
+        if (found) setPrize(found);
+      }
     } else {
       setVoteData({ home: seedHome, draw: seedDraw, away: seedAway });
     }
   }, [matchId]);
 
   const handleVote = (option: 'home' | 'draw' | 'away') => {
-    if (votedOption) return; // Prevent double voting
+    if (votedOption) return;
 
     localStorage.setItem(`cyber2-vote-${matchId}`, option);
     setVotedOption(option);
@@ -47,6 +71,29 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam }: MatchVoting
     }));
   };
 
+  const handleClaimPrize = () => {
+    if (prize) return;
+    // Select a random prize
+    const randomPrize = PRIZES[Math.floor(Math.random() * PRIZES.length)];
+    localStorage.setItem(`cyber2-prize-${matchId}`, randomPrize.code);
+    setPrize(randomPrize);
+  };
+
+  const copyToClipboard = () => {
+    if (!prize) return;
+    navigator.clipboard.writeText(prize.code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Determine actual winner based on scores
+  let winner: 'home' | 'draw' | 'away' = 'draw';
+  if (scores) {
+    if (scores.home > scores.away) winner = 'home';
+    else if (scores.home < scores.away) winner = 'away';
+  }
+
+  const isPredictionCorrect = votedOption === winner;
   const totalVotes = voteData.home + voteData.draw + voteData.away;
   const pctHome = totalVotes > 0 ? Math.round((voteData.home / totalVotes) * 100) : 0;
   const pctDraw = totalVotes > 0 ? Math.round((voteData.draw / totalVotes) * 100) : 0;
@@ -54,14 +101,26 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam }: MatchVoting
 
   return (
     <div className="mt-6 pt-5 border-t border-[#20242e] w-full">
-      <div className="flex items-center space-x-2 mb-4">
-        <span className="flex h-2 w-2 relative">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff66] opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff66]"></span>
-        </span>
-        <h4 className="text-[11px] font-black text-white uppercase tracking-wider">
-          Match Outcome Predictor
-        </h4>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff66] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff66]"></span>
+          </span>
+          <h4 className="text-[11px] font-black text-white uppercase tracking-wider">
+            Match Outcome Predictor & Prizes
+          </h4>
+        </div>
+        
+        {/* Test Mode Switcher */}
+        {currentStatus !== 'FINISHED' && (
+          <button 
+            onClick={() => setCurrentStatus('FINISHED')}
+            className="text-[8px] bg-slate-800 text-slate-400 hover:text-white px-2 py-0.5 rounded border border-slate-700/50 cursor-pointer transition-colors"
+          >
+            ⚙️ Test Match End
+          </button>
+        )}
       </div>
 
       {!votedOption ? (
@@ -104,74 +163,131 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam }: MatchVoting
           </button>
         </div>
       ) : (
-        /* VOTE PERCENTAGE RESULTS SHOWCASE */
-        <div className="space-y-3 bg-[#08090a]/50 p-4 rounded-2xl border border-[#20242e]">
-          {/* Home Win Bar */}
-          <div>
-            <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
-              <span className="text-white flex items-center space-x-1.5">
-                <span className="truncate max-w-[120px]">{homeTeam} Win</span>
-                {votedOption === 'home' && (
-                  <span className="text-[8px] bg-[#00ff66]/10 text-[#00ff66] px-1.5 py-0.5 rounded border border-[#00ff66]/20">
-                    Your Vote
-                  </span>
-                )}
-              </span>
-              <span className="text-[#00ff66] font-black">{pctHome}%</span>
+        /* VOTE PERCENTAGE RESULTS SHOWCASE & REWARDS */
+        <div className="space-y-4">
+          <div className="space-y-3 bg-[#08090a]/50 p-4 rounded-2xl border border-[#20242e]">
+            {/* Home Win Bar */}
+            <div>
+              <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
+                <span className="text-white flex items-center space-x-1.5">
+                  <span className="truncate max-w-[120px]">{homeTeam} Win</span>
+                  {votedOption === 'home' && (
+                    <span className="text-[8px] bg-[#00ff66]/10 text-[#00ff66] px-1.5 py-0.5 rounded border border-[#00ff66]/20">
+                      Your Vote
+                    </span>
+                  )}
+                </span>
+                <span className="text-[#00ff66] font-black">{pctHome}%</span>
+              </div>
+              <div className="h-2 w-full bg-slate-800/40 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                  style={{ width: `${pctHome}%` }}
+                />
+              </div>
             </div>
-            <div className="h-2 w-full bg-slate-800/40 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-                style={{ width: `${pctHome}%` }}
-              />
+
+            {/* Draw Bar */}
+            <div>
+              <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
+                <span className="text-white flex items-center space-x-1.5">
+                  <span>Draw</span>
+                  {votedOption === 'draw' && (
+                    <span className="text-[8px] bg-slate-700/20 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700/40">
+                      Your Vote
+                    </span>
+                  )}
+                </span>
+                <span className="text-slate-400 font-black">{pctDraw}%</span>
+              </div>
+              <div className="h-2 w-full bg-slate-800/40 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-slate-600 rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: `${pctDraw}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Away Win Bar */}
+            <div>
+              <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
+                <span className="text-white flex items-center space-x-1.5">
+                  <span className="truncate max-w-[120px]">{awayTeam} Win</span>
+                  {votedOption === 'away' && (
+                    <span className="text-[8px] bg-[#ff3b30]/10 text-[#ff3b30] px-1.5 py-0.5 rounded border border-[#ff3b30]/20">
+                      Your Vote
+                    </span>
+                  )}
+                </span>
+                <span className="text-[#ff3b30] font-black">{pctAway}%</span>
+              </div>
+              <div className="h-2 w-full bg-slate-800/40 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+                  style={{ width: `${pctAway}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Draw Bar */}
-          <div>
-            <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
-              <span className="text-white flex items-center space-x-1.5">
-                <span>Draw</span>
-                {votedOption === 'draw' && (
-                  <span className="text-[8px] bg-slate-700/20 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700/40">
-                    Your Vote
-                  </span>
-                )}
-              </span>
-              <span className="text-slate-400 font-black">{pctDraw}%</span>
-            </div>
-            <div className="h-2 w-full bg-slate-800/40 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-slate-600 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${pctDraw}%` }}
-              />
-            </div>
-          </div>
+          {/* PRIZE DISPLAY SECTION */}
+          {currentStatus === 'FINISHED' ? (
+            isPredictionCorrect ? (
+              /* Correct Prediction Screen */
+              <div className="bg-emerald-950/20 border border-emerald-500/20 p-4 rounded-2xl text-center flex flex-col items-center">
+                <div className="text-xl mb-1">🎉</div>
+                <h5 className="text-[#00ff66] text-xs font-black uppercase tracking-wider">Correct Prediction!</h5>
+                <p className="text-[10px] text-slate-400 mt-1 leading-relaxed max-w-xs">
+                  Your prediction was correct! Claim your random winner code below.
+                </p>
 
-          {/* Away Win Bar */}
-          <div>
-            <div className="flex items-center justify-between text-[10px] font-bold mb-1.5">
-              <span className="text-white flex items-center space-x-1.5">
-                <span className="truncate max-w-[120px]">{awayTeam} Win</span>
-                {votedOption === 'away' && (
-                  <span className="text-[8px] bg-[#ff3b30]/10 text-[#ff3b30] px-1.5 py-0.5 rounded border border-[#ff3b30]/20">
-                    Your Vote
-                  </span>
+                {!prize ? (
+                  <button
+                    onClick={handleClaimPrize}
+                    className="mt-3 bg-[#00ff66] hover:bg-[#00e059] text-black font-extrabold text-[10px] uppercase tracking-wider px-5 py-2 rounded-xl transition-all cursor-pointer shadow-[0_0_15px_rgba(0,255,102,0.15)]"
+                  >
+                    🎁 Unlock Random Reward
+                  </button>
+                ) : (
+                  /* Revealed Reward Code */
+                  <div className="mt-3.5 w-full bg-[#08090a] border border-[#20242e] p-3 rounded-xl flex flex-col items-center">
+                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest">{prize.desc}</span>
+                    <div className="flex items-center space-x-2 mt-2 w-full max-w-[220px]">
+                      <span className="bg-[#12141a] border border-[#20242e] text-white font-mono text-xs font-bold py-1.5 px-3 rounded-lg text-center flex-grow select-all">
+                        {prize.code}
+                      </span>
+                      <button
+                        onClick={copyToClipboard}
+                        className={`text-[10px] font-black px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+                          copied 
+                            ? 'bg-emerald-500/10 text-[#00ff66] border-emerald-500/30' 
+                            : 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700'
+                        }`}
+                      >
+                        {copied ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </span>
-              <span className="text-[#ff3b30] font-black">{pctAway}%</span>
+              </div>
+            ) : (
+              /* Incorrect Prediction Screen */
+              <div className="bg-slate-900/30 border border-slate-800 p-4 rounded-2xl text-center flex flex-col items-center">
+                <div className="text-xl mb-1">😢</div>
+                <h5 className="text-slate-400 text-xs font-black uppercase tracking-wider">Prediction Incorrect</h5>
+                <p className="text-[10px] text-slate-500 mt-1 leading-relaxed max-w-xs">
+                  Your prediction did not match the final outcome. Better luck next time!
+                </p>
+              </div>
+            )
+          ) : (
+            /* Live/Upcoming Info Display */
+            <div className="bg-[#12141a]/40 border border-dashed border-[#20242e] p-3 rounded-2xl text-center">
+              <p className="text-[10px] text-slate-500 font-bold leading-normal">
+                Prediction locked! Return here once the match ends. Correct predictions will unlock a random reward code!
+              </p>
             </div>
-            <div className="h-2 w-full bg-slate-800/40 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(239,68,68,0.3)]"
-                style={{ width: `${pctAway}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="text-[9px] text-slate-500 font-bold text-center pt-1 uppercase tracking-wider">
-            Total {totalVotes} predictions submitted by visitors
-          </div>
+          )}
         </div>
       )}
     </div>

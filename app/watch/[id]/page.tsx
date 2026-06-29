@@ -249,7 +249,13 @@ export default function WatchPage() {
                   </span>
                 </div>
               </div>
-              <MatchVoting matchId={match.id} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
+              <MatchVoting 
+                matchId={match.id} 
+                homeTeam={match.homeTeam} 
+                awayTeam={match.awayTeam} 
+                status={match.status} 
+                scores={match.scores} 
+              />
             </div>
 
             {/* Monetization space below details */}
