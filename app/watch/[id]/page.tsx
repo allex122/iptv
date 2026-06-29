@@ -12,6 +12,7 @@ import AdPlaceholder from '@/components/AdPlaceholder';
 import MatchVoting from '@/components/MatchVoting';
 import LiveFanZone from '@/components/LiveFanZone';
 import ScratchCardWidget from '@/components/ScratchCardWidget';
+import PolymarketOdds from '@/components/PolymarketOdds';
 import { Match, StreamServer } from '@/types/match';
 import Link from 'next/link';
 
@@ -266,6 +267,11 @@ export default function WatchPage() {
                 scores={match.scores} 
               />
               <ScratchCardWidget matchId={match.id} />
+              <PolymarketOdds 
+                matchId={match.id} 
+                homeTeam={match.homeTeam} 
+                awayTeam={match.awayTeam} 
+              />
             </div>
 
             {/* Monetization space below details */}
