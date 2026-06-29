@@ -8,84 +8,53 @@ interface AdPlaceholderProps {
 }
 
 export default function AdPlaceholder({ type, className = '' }: AdPlaceholderProps) {
-  // 1. Sidebar Ad Skyscraper (300x600)
+  // 1. Sidebar Skyscraper Placeholder (No Iframes)
   if (type === 'sidebar') {
     return (
-      <div className={`flex flex-col items-center justify-center bg-[#12141a] border border-[#20242e] rounded-2xl p-2.5 w-full max-w-[320px] mx-auto overflow-hidden ${className}`}>
-        <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-1.5 self-start pl-1">
-          Sponsored Skyscraper Ad
-        </span>
-        <div className="w-[300px] h-[600px] bg-black rounded-lg overflow-hidden flex items-center justify-center border border-slate-800">
-          <iframe
-            scrolling="no"
-            frameBorder="0"
-            style={{ padding: '0px', margin: '0px', border: '0px', borderStyle: 'none' }}
-            width="300"
-            height="600"
-            src="https://refbanners.com/I?tag=d_245495m_62435c_&site=245495&ad=62435"
-          ></iframe>
+      <div className={`flex flex-col bg-[#12141a] border border-[#20242e] rounded-2xl p-4 text-center w-full max-w-[320px] min-h-[300px] mx-auto justify-between ${className}`}>
+        <div className="flex justify-between items-center border-b border-[#20242e] pb-2 mb-3">
+          <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">
+            Sponsored Ad
+          </span>
+          <span className="text-[9px] text-[#00ff66] font-semibold bg-[#00ff66]/10 px-1.5 py-0.5 rounded">
+            300x600 Slot
+          </span>
+        </div>
+        <div className="flex flex-col items-center justify-center flex-grow border border-dashed border-[#2e3545] bg-[#0c0e12] rounded-xl p-6 text-slate-400 hover:text-[#00ff66] transition-all cursor-pointer">
+          <span className="text-3xl mb-2">💰</span>
+          <span className="text-xs font-black text-slate-300">PREMIUM SPONSOR SLOT</span>
+          <span className="text-[10px] text-slate-500 mt-1">Get 100% Match Bonus on Sign Up!</span>
         </div>
       </div>
     );
   }
 
-  // 2. Smaller Square Ad (160x200)
+  // 2. Small Box Placeholder (No Iframes)
   if (type === 'square') {
     return (
-      <div className={`flex flex-col items-center justify-center bg-[#12141a] border border-[#20242e] rounded-2xl p-2 w-full max-w-[180px] mx-auto overflow-hidden ${className}`}>
-        <span className="text-[7px] uppercase tracking-widest text-slate-500 font-bold mb-1">
-          Sponsor Box
-        </span>
-        <div className="w-[160px] h-[200px] bg-black rounded-lg overflow-hidden flex items-center justify-center border border-slate-800">
-          <iframe
-            scrolling="no"
-            frameBorder="0"
-            style={{ padding: '0px', margin: '0px', border: '0px', borderStyle: 'none' }}
-            width="160"
-            height="200"
-            src="https://refbanners.com/I?tag=d_245495m_62433c_&site=245495&ad=62433"
-          ></iframe>
+      <div className={`flex flex-col bg-[#12141a] border border-[#20242e] rounded-xl p-3 text-center w-full max-w-[180px] mx-auto justify-between ${className}`}>
+        <div className="flex justify-between items-center border-b border-[#20242e] pb-1 mb-2">
+          <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold">
+            Sponsor Box
+          </span>
+          <span className="text-[8px] text-slate-500 font-bold">160x200</span>
+        </div>
+        <div className="flex flex-col items-center justify-center py-6 border border-dashed border-[#2e3545] bg-[#0c0e12] rounded-xl text-slate-500 text-[10px]">
+          <span className="text-lg">📣</span>
+          <span className="font-bold mt-1">Advertise Here</span>
         </div>
       </div>
     );
   }
 
-  // 3. Main Wide Banner (800x250)
-  if (type === 'banner') {
-    return (
-      <div className={`flex flex-col items-center justify-center bg-[#12141a] border border-[#20242e] rounded-3xl p-3 w-full max-w-[840px] mx-auto overflow-hidden ${className}`}>
-        <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-1.5 self-start pl-2">
-          Sponsored Leaderboard Banner
-        </span>
-        <div className="w-full max-w-[800px] h-[250px] bg-black rounded-xl overflow-hidden flex items-center justify-center border border-slate-800">
-          <iframe
-            scrolling="no"
-            frameBorder="0"
-            style={{ padding: '0px', margin: '0px', border: '0px', borderStyle: 'none' }}
-            width="800"
-            height="250"
-            src="https://refbanners.com/I?tag=d_245495m_62437c_&site=245495&ad=62437"
-          ></iframe>
-        </div>
-      </div>
-    );
-  }
-
-  // Fallback for header / overlay placements
+  // 3. Wide Leaderboard Banner Placeholder (No Iframes)
   return (
-    <div className={`flex flex-col items-center justify-center bg-[#12141a] border border-[#20242e] rounded-3xl p-3 w-full max-w-[840px] mx-auto overflow-hidden ${className}`}>
-      <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-1.5 self-start pl-2">
-        Sponsored Advertisement
+    <div className={`flex flex-col items-center justify-center bg-[#12141a] border border-[#20242e] rounded-3xl p-4 w-full max-w-[840px] mx-auto overflow-hidden ${className}`}>
+      <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-2 self-start pl-2">
+        Sponsored Leaderboard Banner (800x250)
       </span>
-      <div className="w-full max-w-[800px] h-[250px] bg-black rounded-xl overflow-hidden flex items-center justify-center border border-slate-800">
-        <iframe
-          scrolling="no"
-          frameBorder="0"
-          style={{ padding: '0px', margin: '0px', border: '0px', borderStyle: 'none' }}
-          width="800"
-          height="250"
-          src="https://refbanners.com/I?tag=d_245495m_62437c_&site=245495&ad=62437"
-        ></iframe>
+      <div className="flex items-center justify-center w-full min-h-[100px] border border-dashed border-[#2e3545] bg-[#0c0e12] text-xs font-bold text-slate-500 hover:text-[#00ff66] transition-colors cursor-pointer rounded-2xl">
+        📣 CLICK TO ADVERTISE HERE — HIGH CTR PLACEMENT
       </div>
     </div>
   );
