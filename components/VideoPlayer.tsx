@@ -34,14 +34,20 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
     // Reset video state
     video.pause();
 
+    // Auto-detect secure context and wrap insecure HTTP stream requests in our server proxy
+    let finalUrl = url;
+    if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+      finalUrl = `/api/stream-proxy?url=${encodeURIComponent(url)}`;
+    }
+
     // Check if browser supports HLS.js (Chrome, Firefox, Edge, etc.)
     if (Hls.isSupported()) {
       hls = new Hls({
         maxMaxBufferLength: 10, // Optimized for lower buffering latency
-        manifestLoadingTimeOut: 8000,
-        levelLoadingTimeOut: 8000
+        manifestLoadingTimeOut: 12000,
+        levelLoadingTimeOut: 12000
       });
-      hls.loadSource(url);
+      hls.loadSource(finalUrl);
       hls.attachMedia(video);
       hlsInstanceRef.current = hls;
 
@@ -75,7 +81,7 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
     } 
     // Check if browser supports HLS natively (Safari / iOS)
     else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = url;
+      video.src = finalUrl;
       
       const handleLoadedMetadata = () => {
         video.play().catch((err) => console.log('Auto-play blocked:', err));
@@ -118,7 +124,7 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
           </div>
           <h3 className="text-white font-extrabold text-sm uppercase tracking-wider">Stream Offline / Buffering</h3>
           <p className="text-slate-400 text-[11px] mt-1.5 max-w-xs leading-relaxed">
-            This stream source ({serverName}) is currently offline or unreachable. Please try selecting **Server 4** or **Server 5** for active feeds.
+            This stream source ({serverName}) is currently offline or unreachable. Please try selecting **Server 1** or **Server 2** for active feeds.
           </p>
         </div>
       )}

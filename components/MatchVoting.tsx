@@ -17,6 +17,16 @@ const PRIZES = [
   { code: 'NFT-CARD-CLAIM', desc: 'Exclusive Winner Digital Badge NFT' }
 ];
 
+// Seed winner alerts for the scrolling marquee ticker
+const WINNER_ALERTS = [
+  "🏆 [User_902] predicted correctly and won a 7-Day VIP Pass!",
+  "🔥 [Gooner_Boy] predicted Draw and won a 50% Discount Code!",
+  "💎 [MessiMagic] predicted correctly and won a Gold Ticket Voucher!",
+  "⚡ [CR7_G.O.A.T] predicted Home win and won a 7-Day VIP Pass!",
+  "🎟️ [Visitor_403] predicted Draw and won a Gold Ticket Voucher!",
+  "👑 [Admin_Test] predicted Away win and won an Exclusive Badge NFT!"
+];
+
 export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initialStatus, scores }: MatchVotingProps) {
   const [votedOption, setVotedOption] = useState<'home' | 'draw' | 'away' | null>(null);
   const [voteData, setVoteData] = useState({ home: 0, draw: 0, away: 0 });
@@ -61,6 +71,8 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initi
   }, [matchId]);
 
   const handleVote = (option: 'home' | 'draw' | 'away') => {
+    // If the match is already finished before voting, block votes completely
+    if (initialStatus === 'FINISHED') return;
     if (votedOption) return;
 
     localStorage.setItem(`cyber2-vote-${matchId}`, option);
@@ -86,7 +98,7 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initi
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Determine actual winner based on scores
+  // Determine actual winner based on final scores
   let winner: 'home' | 'draw' | 'away' = 'draw';
   if (scores) {
     if (scores.home > scores.away) winner = 'home';
@@ -99,8 +111,28 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initi
   const pctDraw = totalVotes > 0 ? Math.round((voteData.draw / totalVotes) * 100) : 0;
   const pctAway = totalVotes > 0 ? Math.round((voteData.away / totalVotes) * 100) : 0;
 
+  // Render winner alerts twice to enable seamless looping marquee scrolling
+  const marqueeItems = [...WINNER_ALERTS, ...WINNER_ALERTS];
+
   return (
     <div className="mt-6 pt-5 border-t border-[#20242e] w-full">
+      
+      {/* 1. SCROLLING WINNERS TICKER MARQUEE */}
+      <div className="w-full overflow-hidden bg-[#08090a] border border-[#20242e] py-1.5 px-3 rounded-xl mb-4 flex items-center space-x-3">
+        <span className="flex-shrink-0 text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded uppercase tracking-wider animate-pulse">
+          Winner Alert
+        </span>
+        <div className="relative flex overflow-x-hidden text-[9px] text-slate-400 font-extrabold uppercase tracking-wider w-full">
+          <div className="animate-marquee-scroll whitespace-nowrap flex space-x-12">
+            {marqueeItems.map((item, idx) => (
+              <span key={idx} className="flex-shrink-0 flex items-center space-x-1">
+                <span>{item}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <span className="flex h-2 w-2 relative">
@@ -108,12 +140,12 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initi
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff66]"></span>
           </span>
           <h4 className="text-[11px] font-black text-white uppercase tracking-wider">
-            Match Outcome Predictor & Prizes
+            Match Outcome Predictor
           </h4>
         </div>
         
-        {/* Test Mode Switcher */}
-        {currentStatus !== 'FINISHED' && (
+        {/* Test Mode Switcher - only show if the match is not finished yet */}
+        {initialStatus !== 'FINISHED' && currentStatus !== 'FINISHED' && votedOption && (
           <button 
             onClick={() => setCurrentStatus('FINISHED')}
             className="text-[8px] bg-slate-800 text-slate-400 hover:text-white px-2 py-0.5 rounded border border-slate-700/50 cursor-pointer transition-colors"
@@ -123,7 +155,16 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initi
         )}
       </div>
 
-      {!votedOption ? (
+      {initialStatus === 'FINISHED' ? (
+        /* BLOCKED SCREEN: MATCH ALREADY FINISHED BEFORE VOTE */
+        <div className="bg-[#08090a]/50 p-4 rounded-2xl border border-[#20242e] text-center">
+          <div className="text-xl mb-1">🔒</div>
+          <h5 className="text-slate-400 text-xs font-black uppercase tracking-wider">Predictions Closed</h5>
+          <p className="text-[10px] text-slate-500 mt-1 leading-relaxed max-w-xs mx-auto">
+            This match is already finished. Outcome predictions are only available for live or upcoming fixtures.
+          </p>
+        </div>
+      ) : !votedOption ? (
         /* VOTE SELECTION BUTTONS */
         <div className="grid grid-cols-3 gap-2.5">
           <button
@@ -230,7 +271,7 @@ export default function MatchVoting({ matchId, homeTeam, awayTeam, status: initi
             </div>
           </div>
 
-          {/* PRIZE DISPLAY SECTION */}
+          {/* PRIZE DISPLAY SECTION - ONLY EVALUATE IF THE MATCH IS ENDED (simulated or real status) */}
           {currentStatus === 'FINISHED' ? (
             isPredictionCorrect ? (
               /* Correct Prediction Screen */
