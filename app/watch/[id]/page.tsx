@@ -11,6 +11,7 @@ import MatchStats from '@/components/MatchStats';
 import AdPlaceholder from '@/components/AdPlaceholder';
 import MatchVoting from '@/components/MatchVoting';
 import LiveFanZone from '@/components/LiveFanZone';
+import ScratchCardWidget from '@/components/ScratchCardWidget';
 import { Match, StreamServer } from '@/types/match';
 import Link from 'next/link';
 
@@ -264,6 +265,7 @@ export default function WatchPage() {
                 status={match.status} 
                 scores={match.scores} 
               />
+              <ScratchCardWidget matchId={match.id} />
             </div>
 
             {/* Monetization space below details */}
