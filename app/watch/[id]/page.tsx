@@ -10,6 +10,7 @@ import LiveChat from '@/components/LiveChat';
 import MatchStats from '@/components/MatchStats';
 import AdPlaceholder from '@/components/AdPlaceholder';
 import MatchVoting from '@/components/MatchVoting';
+import LiveFanZone from '@/components/LiveFanZone';
 import { Match, StreamServer } from '@/types/match';
 import Link from 'next/link';
 
@@ -168,6 +169,13 @@ export default function WatchPage() {
               servers={match.servers}
               activeServerId={activeServer ? activeServer.id : ''}
               onSelectServer={handleSelectServer}
+            />
+
+            {/* Live Fan Zone (Cheer Battle & Floating Emojis) */}
+            <LiveFanZone
+              matchId={match.id}
+              homeTeam={match.homeTeam}
+              awayTeam={match.awayTeam}
             />
 
             {/* Match Information and Scoreboard */}
