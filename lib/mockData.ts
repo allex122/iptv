@@ -1,34 +1,10 @@
 import { Match, StreamServer } from '../types/match';
 
 export const liveMatchStreams: StreamServer[] = [
-  {
-    id: "global-hd-1",
-    name: "Server 1 - Global High-Speed Feed (Recommended)",
-    url: "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
-    type: "hls",
-    isGlobal: true,
-    status: "ONLINE"
-  },
-  {
-    id: "global-fifa-2",
-    name: "Server 2 - FIFA Arena Direct Stream",
-    url: "http://198.195.239.50:8095/Fifa-1/video.m3u8",
-    type: "hls",
-    isGlobal: true,
-    status: "ONLINE"
-  },
-  {
-    id: "local-tsports-3",
-    name: "Server 3 - T Sports HD (Subcontinent Server)",
-    url: "http://10.45.45.254:8082/T-SPORTS-HD/tracks-v1a1/mono.m3u8?token=95956d581dd92f6c0c316a175507b966d19515e7-5a84e0a8c786f1a966e53be8e0ed09c6-1782770269-1782759469",
-    type: "hls",
-    isGlobal: false,
-    status: "ONLINE"
-  },
-  // Added working secure HTTPS streams that play worldwide
+  // Prioritized working secure HTTPS streams that play worldwide under HTTPS (Vercel)
   {
     id: "secure-sony-1",
-    name: "Server 4 - Sony Sports 1 (Global HD)",
+    name: "Server 1 - Sony Sports 1 (Global HD)",
     url: "https://vcp.myplaytv.com/sonysports1/mono.m3u8",
     type: "hls",
     isGlobal: true,
@@ -36,7 +12,7 @@ export const liveMatchStreams: StreamServer[] = [
   },
   {
     id: "secure-star-1",
-    name: "Server 5 - Star Sports Select 1 (Global)",
+    name: "Server 2 - Star Sports Select 1 (Global)",
     url: "https://bpprod6linear.akamaized.net/bpk-tv/irdeto_com_Channel_255/index.m3u8",
     type: "hls",
     isGlobal: true,
@@ -44,10 +20,35 @@ export const liveMatchStreams: StreamServer[] = [
   },
   {
     id: "secure-iframe-backup",
-    name: "Server 6 - Backup Livescore Feed (Iframe)",
+    name: "Server 3 - Backup Livescore Feed (Iframe)",
     url: "https://www.scorebat.com/embed/livescore/",
     type: "iframe",
     isGlobal: true,
+    status: "ONLINE"
+  },
+  // Insecure HTTP streams moved to lower priority
+  {
+    id: "global-hd-1",
+    name: "Server 4 - Global High-Speed Feed (Recommended)",
+    url: "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "global-fifa-2",
+    name: "Server 5 - FIFA Arena Direct Stream",
+    url: "http://198.195.239.50:8095/Fifa-1/video.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "local-tsports-3",
+    name: "Server 6 - T Sports HD (Subcontinent Server)",
+    url: "http://10.45.45.254:8082/T-SPORTS-HD/tracks-v1a1/mono.m3u8?token=95956d581dd92f6c0c316a175507b966d19515e7-5a84e0a8c786f1a966e53be8e0ed09c6-1782770269-1782759469",
+    type: "hls",
+    isGlobal: false,
     status: "ONLINE"
   }
 ];
