@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Match } from '@/types/match';
-import { liveMatchStreams } from '@/lib/mockData';
+import { liveMatchStreams, mockMatches } from '@/lib/mockData';
 
 export async function GET(request: Request) {
   try {
@@ -8,34 +8,69 @@ export async function GET(request: Request) {
     const dateQuery = searchParams.get('date');
 
     // Fetch live fixtures from ESPN soccer scoreboard API
-    const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard', {
-      method: 'GET',
-      headers: {
-        'Cache-Control': 'no-cache'
-      },
-      next: { revalidate: 30 }
-    });
-
-    const data = await res.json();
-    let events = data.events || [];
+    let events: any[] = [];
+    try {
+      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard', {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache'
+        },
+        next: { revalidate: 30 }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        events = data.events || [];
+      }
+    } catch (e) {
+      console.warn("ESPN World Cup API failed, trying fallback:", e);
+    }
     
     if (events.length === 0) {
-      // Fallback to international club scoreboard if World Cup matches are not live
-      const fallbackRes = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard', {
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      const fallbackData = await fallbackRes.json();
-      events = fallbackData.events || [];
+      try {
+        // Fallback to international club scoreboard if World Cup matches are not live
+        const fallbackRes = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard', {
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        if (fallbackRes.ok) {
+          const fallbackData = await fallbackRes.json();
+          events = fallbackData.events || [];
+        }
+      } catch (e) {
+        console.warn("ESPN Fallback API failed:", e);
+      }
     }
 
     const formattedMatches = formatESPNData(events, dateQuery);
-    return NextResponse.json(formattedMatches);
+    
+    // Merge ESPN matches with the local mock matches (Cricket, WWE, Basketball, etc.)
+    // Avoid duplicating if the ESPN API somehow contains a duplicate ID
+    const mergedMatches = [...formattedMatches];
+    const existingIds = new Set(formattedMatches.map((m) => m.id));
+
+    for (const mock of mockMatches) {
+      if (!existingIds.has(mock.id)) {
+        // If a date query is passed, filter matches that match the requested date
+        if (dateQuery) {
+          if (mock.date === dateQuery) {
+            mergedMatches.push(mock);
+          }
+        } else {
+          mergedMatches.push(mock);
+        }
+      }
+    }
+
+    return NextResponse.json(mergedMatches);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch real-time data from live aggregator' }, { status: 500 });
+    console.error("Matches API general error:", error);
+    // Fallback solely to mock matches if all external requests fail
+    return NextResponse.json(mockMatches);
   }
 }
 
 function formatESPNData(events: any[], dateQuery: string | null): Match[] {
+  if (!events) return [];
+  
   return events.map((event: any) => {
     const competition = event.competitions[0];
     const home = competition.competitors[0];
