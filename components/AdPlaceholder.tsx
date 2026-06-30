@@ -8,7 +8,18 @@ interface AdPlaceholderProps {
 }
 
 export default function AdPlaceholder({ type, className = '' }: AdPlaceholderProps) {
-  // 1. Sidebar Skyscraper Placeholder (No Iframes)
+  // 1. Header Banner Placeholder (Leaderboard 728x90)
+  if (type === 'header') {
+    return (
+      <div className={`hidden md:flex flex-col items-center justify-center bg-[#0d0f14] border border-[#20242e] rounded-md py-2 px-4 text-center max-w-[728px] h-[45px] mx-auto overflow-hidden ${className}`}>
+        <div className="flex items-center justify-center w-full h-full border border-dashed border-[#2e3545] bg-[#12141c] text-[#00ff66] text-[10px] font-black hover:bg-[#161a24] transition-colors cursor-pointer rounded">
+          <span className="animate-pulse mr-2">⚡</span> ADVERTISING PARTNER — SPONSORSHIP SLOT (728x90)
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Sidebar Skyscraper Placeholder (No Iframes)
   if (type === 'sidebar') {
     return (
       <div className={`flex flex-col bg-[#12141a] border border-[#20242e] rounded-2xl p-4 text-center w-full max-w-[320px] min-h-[300px] mx-auto justify-between ${className}`}>
@@ -29,7 +40,7 @@ export default function AdPlaceholder({ type, className = '' }: AdPlaceholderPro
     );
   }
 
-  // 2. Small Box Placeholder (No Iframes)
+  // 3. Small Box Placeholder (No Iframes)
   if (type === 'square') {
     return (
       <div className={`flex flex-col bg-[#12141a] border border-[#20242e] rounded-xl p-3 text-center w-full max-w-[180px] mx-auto justify-between ${className}`}>
@@ -47,7 +58,7 @@ export default function AdPlaceholder({ type, className = '' }: AdPlaceholderPro
     );
   }
 
-  // 3. Wide Leaderboard Banner Placeholder (No Iframes)
+  // 4. Wide Leaderboard Banner Placeholder (No Iframes)
   return (
     <div className={`flex flex-col items-center justify-center bg-[#12141a] border border-[#20242e] rounded-3xl p-4 w-full max-w-[840px] mx-auto overflow-hidden ${className}`}>
       <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-2 self-start pl-2">

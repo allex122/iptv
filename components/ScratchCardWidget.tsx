@@ -89,6 +89,16 @@ export default function ScratchCardWidget({ matchId }: ScratchCardWidgetProps) {
   const startScratching = () => setIsDrawing(true);
   const stopScratching = () => setIsDrawing(false);
 
+  const creditCoins = (code: string) => {
+    const stored = localStorage.getItem('cyber2-coins');
+    const current = stored !== null ? parseInt(stored) : 100;
+    const amount = code === 'BONUS-COIN-100' ? 100 : 20;
+    
+    localStorage.setItem('cyber2-coins', (current + amount).toString());
+    // Dispatch custom event to update the header
+    window.dispatchEvent(new Event('cyber2-coins-updated'));
+  };
+
   const scratch = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -118,8 +128,11 @@ export default function ScratchCardWidget({ matchId }: ScratchCardWidgetProps) {
     setScratchProgress((prev) => {
       const next = prev + 1;
       // After ~45 scratch inputs, we auto-clear the canvas to reveal full reward
-      if (next >= 45) {
+      if (next === 45) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (revealedPrize) {
+          creditCoins(revealedPrize.code);
+        }
       }
       return next;
     });

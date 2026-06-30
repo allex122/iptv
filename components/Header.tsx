@@ -1,10 +1,36 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AdPlaceholder from './AdPlaceholder';
 
 export default function Header() {
+  const [coins, setCoins] = useState<number | null>(null);
+
+  // Sync wallet balance securely on mount (and listen for updates)
+  useEffect(() => {
+    const fetchBalance = () => {
+      const stored = localStorage.getItem('cyber2-coins');
+      if (stored !== null) {
+        setCoins(parseInt(stored));
+      } else {
+        localStorage.setItem('cyber2-coins', '100'); // Start users with 100 free coins
+        setCoins(100);
+      }
+    };
+
+    fetchBalance();
+
+    // Listen to changes from scratch cards or drama unlock events
+    window.addEventListener('storage', fetchBalance);
+    window.addEventListener('cyber2-coins-updated', fetchBalance);
+
+    return () => {
+      window.removeEventListener('storage', fetchBalance);
+      window.removeEventListener('cyber2-coins-updated', fetchBalance);
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 w-full glass-header">
       {/* Upper Header: Navigation and Logo */}
@@ -35,42 +61,32 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Center Search / Stats bar */}
-          <div className="hidden lg:flex flex-1 max-w-sm mx-10">
-            <div className="relative w-full">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </span>
-              <input 
-                type="text" 
-                placeholder="Search leagues, teams, or sports..." 
-                className="w-full pl-10 pr-4 py-2 bg-[#12141a] border border-[#20242e] focus:border-[#00ff66]/50 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-all"
-              />
-            </div>
-          </div>
-
           {/* Navigation Links & Action Buttons */}
           <div className="flex items-center space-x-6">
             <nav className="hidden md:flex space-x-6 text-sm font-semibold">
-              <Link href="/" className="text-[#00ff66] hover:text-[#00ff66] transition-colors">
+              <Link href="/" className="text-slate-300 hover:text-[#00ff66] transition-colors">
                 Streams
               </Link>
-              <a href="#stats" className="text-slate-300 hover:text-white transition-colors">
+              <Link href="/dramas" className="text-[#00ff66] hover:text-[#00ff66] transition-colors flex items-center space-x-1">
+                <span>🎭</span>
+                <span>Micro Dramas</span>
+              </Link>
+              <Link href="/#stats" className="text-slate-300 hover:text-white transition-colors">
                 Live Scores
-              </a>
-              <a href="#schedule" className="text-slate-300 hover:text-white transition-colors">
+              </Link>
+              <Link href="/#schedule" className="text-slate-300 hover:text-white transition-colors">
                 Schedule
-              </a>
+              </Link>
             </nav>
             
-            {/* CTA Buy/Demo button (perfect for CodeCanyon product) */}
+            {/* Wallet Coin Balance and Refresh Action */}
             <div className="flex items-center space-x-3">
-              <span className="hidden sm:inline-flex items-center space-x-1 bg-[#12141a] border border-[#20242e] px-3 py-1.5 rounded-lg text-xs text-slate-300">
-                <span className="w-2 h-2 rounded-full bg-[#00ff66] live-pulse-dot mr-1"></span>
-                <span>24 streams active</span>
-              </span>
+              {coins !== null && (
+                <div className="inline-flex items-center space-x-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs text-amber-400 font-black animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.15)]">
+                  <span>🪙</span>
+                  <span>{coins} Coins</span>
+                </div>
+              )}
               
               <Link
                 href="/"
