@@ -51,26 +51,34 @@ export const liveMatchStreams: StreamServer[] = [
     status: "ONLINE"
   },
   {
-    id: "secure-iframe-backup-7",
-    name: "Server 7 - Backup Livescore Feed (Iframe)",
+    id: "secure-bein-7",
+    name: "Server 7 - beIN Sports XTRA (Global HD)",
+    url: "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "secure-cbs-8",
+    name: "Server 8 - CBS Sports Golazo (Soccer HD)",
+    url: "https://proped3fhg87.airspace-cdn.cbsivideo.com/golazo-live-dai/master/golazo-live-dai.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "secure-dazn-9",
+    name: "Server 9 - DAZN Combat (Fight Sports)",
+    url: "https://dazn-combat-rakuten.amagi.tv/hls/amagi_hls_data_rakutenAA-dazn-combat-rakuten/CDN/master.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "secure-iframe-backup-10",
+    name: "Server 10 - Backup Livescore Feed (Iframe)",
     url: "https://www.scorebat.com/embed/livescore/",
     type: "iframe",
-    isGlobal: true,
-    status: "ONLINE"
-  },
-  {
-    id: "global-hd-8",
-    name: "Server 8 - Global High-Speed Feed (Recommended)",
-    url: "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
-    type: "hls",
-    isGlobal: true,
-    status: "ONLINE"
-  },
-  {
-    id: "global-fifa-9",
-    name: "Server 9 - FIFA Arena Direct Stream",
-    url: "http://198.195.239.50:8095/Fifa-1/video.m3u8",
-    type: "hls",
     isGlobal: true,
     status: "ONLINE"
   }
