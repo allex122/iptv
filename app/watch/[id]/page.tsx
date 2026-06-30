@@ -35,7 +35,7 @@ export default function WatchPage() {
       setError(false);
       try {
         // Fetch all matches to find current match and other sidebar matches
-        const res = await fetch('/api/matches');
+        const res = await fetch(`/api/matches?t=${Date.now()}`);
         if (res.ok) {
           const allMatches: Match[] = await res.json();
           const current = allMatches.find((m) => m.id === matchId);
