@@ -27,24 +27,48 @@ export const liveMatchStreams: StreamServer[] = [
     status: "ONLINE"
   },
   {
-    id: "secure-iframe-backup-4",
-    name: "Server 4 - Backup Livescore Feed (Iframe)",
+    id: "secure-cbc-4",
+    name: "Server 4 - CBC Sport HD (UCL Feed)",
+    url: "https://mn-nl.mncdn.com/cbcsports_live/cbcsports/playlist.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "secure-cctv-5",
+    name: "Server 5 - CCTV-5 HD (World Cup Feed)",
+    url: "https://node1.olelive.com:6443/live/CCTV5HD/hls.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "secure-orf-6",
+    name: "Server 6 - ORF Sport + (Europe HD)",
+    url: "https://orfs.mdn.ors.at/out/u/orfs/q8c/manifest.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "secure-iframe-backup-7",
+    name: "Server 7 - Backup Livescore Feed (Iframe)",
     url: "https://www.scorebat.com/embed/livescore/",
     type: "iframe",
     isGlobal: true,
     status: "ONLINE"
   },
   {
-    id: "global-hd-5",
-    name: "Server 5 - Global High-Speed Feed (Recommended)",
+    id: "global-hd-8",
+    name: "Server 8 - Global High-Speed Feed (Recommended)",
     url: "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
     type: "hls",
     isGlobal: true,
     status: "ONLINE"
   },
   {
-    id: "global-fifa-6",
-    name: "Server 6 - FIFA Arena Direct Stream",
+    id: "global-fifa-9",
+    name: "Server 9 - FIFA Arena Direct Stream",
     url: "http://198.195.239.50:8095/Fifa-1/video.m3u8",
     type: "hls",
     isGlobal: true,
