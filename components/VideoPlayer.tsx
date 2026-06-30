@@ -14,11 +14,13 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
   const hlsInstanceRef = useRef<Hls | null>(null);
   const [hasError, setHasError] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
+  const [showInsecurePopup, setShowInsecurePopup] = useState(false);
 
   // Reset errors when source URL swaps
   useEffect(() => {
     setHasError(false);
     setErrorCount(0);
+    setShowInsecurePopup(false);
   }, [url]);
 
   // Handle HLS stream loading and cleanup
@@ -34,18 +36,28 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
     // Reset video state
     video.pause();
 
-    // Wrap insecure HTTP requests in proxy, EXCEPT for private local LAN IPs which cloud serverless cannot reach
+    // Determine if we need to proxy the URL or pass it directly.
     let finalUrl = url;
     const isPrivateIP = url.includes('//10.') || url.includes('//192.168.') || url.includes('//172.') || url.includes('localhost') || url.includes('127.0.0.1');
-    
-    if (window.location.protocol === 'https:' && url.startsWith('http://') && !isPrivateIP) {
-      finalUrl = `/api/stream-proxy?url=${encodeURIComponent(url)}`;
+    const hasCustomPort = /:([0-9]{4,5})/.test(url.replace(/^https?:\/\//, ''));
+    const isHttpOnHttps = window.location.protocol === 'https:' && url.startsWith('http://');
+
+    if (isHttpOnHttps && !isPrivateIP) {
+      if (hasCustomPort) {
+        // Vercel serverless blocks outbound requests to custom ports (e.g., 8095).
+        // So we CANNOT proxy it. We must load it directly. 
+        // This will trigger a Mixed Content block which we will catch and show a popup.
+        finalUrl = url;
+      } else {
+        // Proxy it since standard ports are allowed by Vercel
+        finalUrl = `/api/stream-proxy?url=${encodeURIComponent(url)}`;
+      }
     }
 
     // Check if browser supports HLS.js (Chrome, Firefox, Edge, etc.)
     if (Hls.isSupported()) {
       hls = new Hls({
-        maxMaxBufferLength: 10, // Optimized for lower buffering latency
+        maxMaxBufferLength: 10,
         manifestLoadingTimeOut: 12000,
         levelLoadingTimeOut: 12000
       });
@@ -61,7 +73,6 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
         if (data.fatal) {
           setErrorCount((prev) => {
             const nextCount = prev + 1;
-            // If the stream fails to load 3 consecutive times, mark it as offline
             if (nextCount >= 3) {
               setHasError(true);
             }
@@ -70,7 +81,12 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
 
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              hls.startLoad(); // Auto-reload HLS feed on dropouts
+              // If we attempted to load a raw http:// URL on https://, network error usually means Mixed Content block.
+              if (finalUrl.startsWith('http://') && window.location.protocol === 'https:') {
+                setShowInsecurePopup(true);
+              } else {
+                hls.startLoad();
+              }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               hls.recoverMediaError();
@@ -90,7 +106,11 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
       };
 
       const handleNativeError = () => {
-        setHasError(true);
+        if (finalUrl.startsWith('http://') && window.location.protocol === 'https:') {
+          setShowInsecurePopup(true);
+        } else {
+          setHasError(true);
+        }
       };
 
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -116,8 +136,31 @@ export default function VideoPlayer({ url, type, serverName }: VideoPlayerProps)
   return (
     <div className="relative w-full aspect-video bg-black rounded-3xl border border-[#20242e] overflow-hidden shadow-2xl">
       
+      {/* INSECURE CONTENT POPUP OVERLAY */}
+      {showInsecurePopup && type !== 'iframe' && (
+        <div className="absolute inset-0 bg-black/95 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center">
+          <div className="p-3 bg-yellow-500/10 rounded-full border border-yellow-500/30 text-yellow-500 mb-4 animate-pulse">
+            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3 className="text-white font-extrabold text-lg uppercase tracking-wider mb-2">Security Permission Required</h3>
+          <p className="text-slate-300 text-sm max-w-md leading-relaxed mb-6">
+            This stream ({serverName}) requires <strong className="text-white">Insecure Content</strong> permission to play on this secure site. 
+            <br/><br/>
+            To watch it, click the <strong className="text-white">Lock (🔒) icon</strong> in your browser's top address bar, go to <strong className="text-white">Site Settings</strong>, and set <strong>Insecure Content</strong> to <strong className="text-emerald-400">Allow</strong>.
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-black font-bold rounded-lg transition-colors shadow-[0_0_15px_rgba(234,179,8,0.4)]"
+          >
+            I have Allowed it (Reload Player)
+          </button>
+        </div>
+      )}
+
       {/* OFFLINE / BUFFERING ERROR STATE OVERLAY */}
-      {hasError && type !== 'iframe' && (
+      {hasError && !showInsecurePopup && type !== 'iframe' && (
         <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center">
           <div className="p-3 bg-red-500/10 rounded-full border border-red-500/20 text-red-500 mb-3 animate-bounce">
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">

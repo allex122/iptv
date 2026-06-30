@@ -83,6 +83,14 @@ export const liveMatchStreams: StreamServer[] = [
     status: "ONLINE"
   },
   {
+    id: "secure-somoy-12",
+    name: "Server 12 - Somoy TV (Live News)",
+    url: "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
     id: "secure-iframe-backup-11",
     name: "Server 11 - Backup Livescore Feed (Iframe)",
     url: "https://www.scorebat.com/embed/livescore/",
