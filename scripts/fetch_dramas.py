@@ -2,85 +2,143 @@ import os
 import json
 import yt_dlp
 
-def search_cc_dramas(keyword):
-    ydl_opts = {
-        'default_search': 'ytsearch10',
-        'quiet': True,
-        # Filters for Creative Commons licensing, and durations between 10 and 30 minutes
-        'match_filter': 'license = "Creative Commons Attribution license (reuse allowed)" & duration >= 600 & duration <= 1800',
-    }
-    
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+PROCESSED_LOG = "processed_dramas.json"
+
+def load_processed_ids():
+    if os.path.exists(PROCESSED_LOG):
         try:
-            info = ydl.extract_info(f"{keyword}", download=False)
-            if 'entries' in info:
-                return info['entries']
-            return [info]
-        except Exception as e:
-            print(f"Error fetching dramas: {e}")
+            with open(PROCESSED_LOG, 'r') as f:
+                return json.load(f)
+        except Exception:
             return []
+    return []
+
+def save_processed_id(video_id):
+    processed_ids = load_processed_ids()
+    if video_id not in processed_ids:
+        processed_ids.append(video_id)
+        try:
+            with open(PROCESSED_LOG, 'w') as f:
+                json.dump(processed_ids, f, indent=4)
+        except Exception as e:
+            print(f"Error saving processed ID: {e}")
 
 def main():
-    print("Searching YouTube for Creative Commons dramas...")
-    raw_entries = search_cc_dramas("thriller short film")
+    search_keywords = [
+        "thriller short film", 
+        "romantic drama short film", 
+        "indie drama short",
+        "suspense short movie"
+    ]
     
+    already_processed = load_processed_ids()
+    
+    # Load existing dramas in public/dramas.json to append to them
+    dramas_path = "public/dramas.json"
     dramas = []
-    for entry in raw_entries:
-        if not entry:
-            print("Skipping empty entry.")
-            continue
+    if os.path.exists(dramas_path):
+        try:
+            with open(dramas_path, 'r', encoding='utf-8') as f:
+                dramas = json.load(f)
+        except Exception:
+            pass
+
+    existing_drama_ids = {d['id'] for d in dramas}
+    
+    print("🚀 Starting Bulk AI Drama Pipeline...")
+    new_count = 0
+
+    for keyword in search_keywords:
+        print(f"🔍 Searching for Creative Commons videos for: {keyword}")
         
-        video_id = entry.get('id')
-        title = entry.get('title', 'Unknown Title')
-        uploader = entry.get('uploader', 'Indie Creator')
-        thumbnail = entry.get('thumbnail') or f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
-        description = entry.get('description', '')
-        if description:
-            description = description[:250] + "..."
-        else:
-            description = f"A thriller short film by {uploader} released under Creative Commons."
-            
-        duration = entry.get('duration', 0)
-        if not duration:
-            continue
-            
-        # Split the video duration into 3 parts (episodes)
-        chunk = duration // 3
+        ydl_opts = {
+            'default_search': 'ytsearch10',  # Searches up to 10 videos per keyword
+            'quiet': True,
+            'match_filter': 'license = "Creative Commons Attribution license (reuse allowed)" & duration >= 600 & duration <= 1800',
+        }
         
-        episodes = [
-            {
-                "ep": 1,
-                "title": "Part 1: The Inciting Incident",
-                "videoUrl": f"https://www.youtube.com/embed/{video_id}?start=0&end={chunk}&autoplay=1",
-                "isFree": True
-            },
-            {
-                "ep": 2,
-                "title": "Part 2: Rising Action",
-                "videoUrl": f"https://www.youtube.com/embed/{video_id}?start={chunk}&end={chunk*2}&autoplay=1",
-                "isFree": True
-            },
-            {
-                "ep": 3,
-                "title": "Part 3: The Climax",
-                "videoUrl": f"https://www.youtube.com/embed/{video_id}?start={chunk*2}&autoplay=1",
-                "isFree": False,
-                "coinCost": 5
-            }
-        ]
-        
-        dramas.append({
-            "id": f"drama-{video_id}",
-            "title": title,
-            "originalCreator": f"{uploader} (CC-BY)",
-            "coverUrl": thumbnail,
-            "description": description,
-            "episodes": episodes
-        })
-        
-    # If no search matches (or due to API limits/quiet mode), output robust mock CC dramas
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            try:
+                search_results = ydl.extract_info(f"{keyword}", download=False)
+                entries = []
+                if 'entries' in search_results:
+                    entries = search_results['entries']
+                else:
+                    entries = [search_results]
+
+                for video in entries:
+                    if not video:
+                        continue
+                        
+                    video_id = video.get('id')
+                    video_title = video.get('title', 'Unknown Title')
+                    uploader = video.get('uploader', 'Indie Creator')
+                    thumbnail = video.get('thumbnail') or f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+                    description = video.get('description', '')
+                    if description:
+                        description = description[:250] + "..."
+                    else:
+                        description = f"A short drama by {uploader} released under Creative Commons."
+
+                    duration = video.get('duration', 0)
+                    if not duration:
+                        continue
+                    
+                    # Duplicate check: Skip if already processed or already in public/dramas.json
+                    drama_id = f"drama-{video_id}"
+                    if video_id in already_processed or drama_id in existing_drama_ids:
+                        print(f"⏭️ Skipping already processed video: {video_title}")
+                        continue
+                        
+                    print(f"📥 New Drama Found: {video_title} | Starting Processing...")
+                    
+                    # Split the video duration into 3 virtual episodes
+                    chunk = duration // 3
+                    
+                    episodes = [
+                        {
+                            "ep": 1,
+                            "title": "Part 1: The Inciting Incident",
+                            "videoUrl": f"https://www.youtube.com/embed/{video_id}?start=0&end={chunk}&autoplay=1",
+                            "isFree": True
+                        },
+                        {
+                            "ep": 2,
+                            "title": "Part 2: Rising Action",
+                            "videoUrl": f"https://www.youtube.com/embed/{video_id}?start={chunk}&end={chunk*2}&autoplay=1",
+                            "isFree": True
+                        },
+                        {
+                            "ep": 3,
+                            "title": "Part 3: The Climax",
+                            "videoUrl": f"https://www.youtube.com/embed/{video_id}?start={chunk*2}&autoplay=1",
+                            "isFree": False,
+                            "coinCost": 5
+                        }
+                    ]
+                    
+                    dramas.append({
+                        "id": drama_id,
+                        "title": video_title,
+                        "originalCreator": f"{uploader} (CC-BY)",
+                        "coverUrl": thumbnail,
+                        "description": description,
+                        "episodes": episodes
+                    })
+                    
+                    # Save ID to processed logs
+                    save_processed_id(video_id)
+                    existing_drama_ids.add(drama_id)
+                    new_count += 1
+                    print(f"✅ Successfully created micro-dramas for: {video_title}")
+                    
+            except Exception as e:
+                print(f"❌ Error searching for keyword {keyword}: {str(e)}")
+                continue
+
+    # Ensure Sintel and Tears of Steel remain loaded if the list is completely empty
     if not dramas:
-        print("No new videos matched filters. Writing fallback Creative Commons content...")
+        print("Writing initial default Creative Commons movies to database...")
         dramas = [
             {
                 "id": "drama-sintel-01",
@@ -140,12 +198,14 @@ def main():
             }
         ]
 
-    # Save to public directory for the Next.js app to load
+    # Save finalized database back to public directory
     os.makedirs("public", exist_ok=True)
-    with open("public/dramas.json", "w", encoding="utf-8") as f:
-        json.dump(dramas, f, indent=2, ensure_ascii=False)
-        
-    print(f"Successfully generated public/dramas.json with {len(dramas)} entries!")
+    try:
+        with open(dramas_path, "w", encoding="utf-8") as f:
+            json.dump(dramas, f, indent=2, ensure_ascii=False)
+        print(f"🎉 Bulk processing complete! Added {new_count} new entries. Total in database: {len(dramas)}")
+    except Exception as e:
+        print(f"Error saving dramas database: {e}")
 
 if __name__ == "__main__":
     main()
