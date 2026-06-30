@@ -131,13 +131,23 @@ export default function DramasPage() {
               {/* VIDEO PLAYER ARENA */}
               <div className="relative aspect-video bg-black rounded-3xl border border-[#20242e] overflow-hidden shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
                 {isEpisodePlayable(activeEpisode) ? (
-                  <video
-                    key={activeEpisode.videoUrl}
-                    src={activeEpisode.videoUrl}
-                    controls
-                    autoPlay
-                    className="w-full h-full object-contain"
-                  />
+                  activeEpisode.videoUrl.includes('youtube.com') || activeEpisode.videoUrl.includes('youtu.be') || activeEpisode.videoUrl.includes('/embed/') ? (
+                    <iframe
+                      key={activeEpisode.videoUrl}
+                      src={activeEpisode.videoUrl}
+                      className="w-full h-full object-contain border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      key={activeEpisode.videoUrl}
+                      src={activeEpisode.videoUrl}
+                      controls
+                      autoPlay
+                      className="w-full h-full object-contain"
+                    />
+                  )
                 ) : (
                   /* Premium Lock Screen */
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#08090a]/95 text-center p-6 z-20">
