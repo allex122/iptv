@@ -27,6 +27,7 @@ def main():
     dramas = []
     for entry in raw_entries:
         if not entry:
+            print("Skipping empty entry.")
             continue
         
         video_id = entry.get('id')
@@ -91,19 +92,19 @@ def main():
                     {
                         "ep": 1,
                         "title": "Part 1: The Discovery",
-                        "videoUrl": "https://www.youtube.com/embed/eRsGy9On1z0?start=0&end=200&autoplay=1",
+                        "videoUrl": "https://www.youtube.com/embed/eRsGyueVLvQ?start=0&end=296&autoplay=1",
                         "isFree": True
                     },
                     {
                         "ep": 2,
                         "title": "Part 2: The Journey",
-                        "videoUrl": "https://www.youtube.com/embed/eRsGy9On1z0?start=200&end=400&autoplay=1",
+                        "videoUrl": "https://www.youtube.com/embed/eRsGyueVLvQ?start=296&end=592&autoplay=1",
                         "isFree": True
                     },
                     {
                         "ep": 3,
                         "title": "Part 3: The Confrontation",
-                        "videoUrl": "https://www.youtube.com/embed/eRsGy9On1z0?start=400&autoplay=1",
+                        "videoUrl": "https://www.youtube.com/embed/eRsGyueVLvQ?start=592&autoplay=1",
                         "isFree": False,
                         "coinCost": 5
                     }
@@ -119,19 +120,19 @@ def main():
                     {
                         "ep": 1,
                         "title": "Part 1: The Amsterdam Uprising",
-                        "videoUrl": "https://www.youtube.com/embed/R6MlUcmO1A4?start=0&end=240&autoplay=1",
+                        "videoUrl": "https://www.youtube.com/embed/OHOpb2fS-cM?start=0&end=244&autoplay=1",
                         "isFree": True
                     },
                     {
                         "ep": 2,
                         "title": "Part 2: The Giant Machine",
-                        "videoUrl": "https://www.youtube.com/embed/R6MlUcmO1A4?start=240&end=480&autoplay=1",
+                        "videoUrl": "https://www.youtube.com/embed/OHOpb2fS-cM?start=244&end=488&autoplay=1",
                         "isFree": True
                     },
                     {
                         "ep": 3,
                         "title": "Part 3: The Final Hope",
-                        "videoUrl": "https://www.youtube.com/embed/R6MlUcmO1A4?start=480&autoplay=1",
+                        "videoUrl": "https://www.youtube.com/embed/OHOpb2fS-cM?start=488&autoplay=1",
                         "isFree": False,
                         "coinCost": 5
                     }

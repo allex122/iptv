@@ -28,19 +28,47 @@ export async function GET() {
         {
           ep: 1,
           title: "Part 1: The Discovery",
-          videoUrl: "https://www.youtube.com/embed/eRsGy9On1z0?start=0&end=200&autoplay=1",
+          videoUrl: "https://www.youtube.com/embed/eRsGyueVLvQ?start=0&end=296&autoplay=1",
           isFree: true
         },
         {
           ep: 2,
           title: "Part 2: The Journey",
-          videoUrl: "https://www.youtube.com/embed/eRsGy9On1z0?start=200&end=400&autoplay=1",
+          videoUrl: "https://www.youtube.com/embed/eRsGyueVLvQ?start=296&end=592&autoplay=1",
           isFree: true
         },
         {
           ep: 3,
           title: "Part 3: The Confrontation",
-          videoUrl: "https://www.youtube.com/embed/eRsGy9On1z0?start=400&autoplay=1",
+          videoUrl: "https://www.youtube.com/embed/eRsGyueVLvQ?start=592&autoplay=1",
+          isFree: false,
+          coinCost: 5
+        }
+      ]
+    },
+    {
+      id: "drama-tears-02",
+      title: "Tears of Steel (Sci-Fi Short)",
+      originalCreator: "Blender Foundation (CC-BY)",
+      coverUrl: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=800&auto=format&fit=crop",
+      description: "A sci-fi film exploring a futuristic battle in Amsterdam where a group of scientists tries to rescue the world from giant robots.",
+      episodes: [
+        {
+          ep: 1,
+          title: "Part 1: The Amsterdam Uprising",
+          videoUrl: "https://www.youtube.com/embed/OHOpb2fS-cM?start=0&end=244&autoplay=1",
+          isFree: true
+        },
+        {
+          ep: 2,
+          title: "Part 2: The Giant Machine",
+          videoUrl: "https://www.youtube.com/embed/OHOpb2fS-cM?start=244&end=488&autoplay=1",
+          isFree: true
+        },
+        {
+          ep: 3,
+          title: "Part 3: The Final Hope",
+          videoUrl: "https://www.youtube.com/embed/OHOpb2fS-cM?start=488&autoplay=1",
           isFree: false,
           coinCost: 5
         }
