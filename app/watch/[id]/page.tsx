@@ -99,9 +99,10 @@ export default function WatchPage() {
             }
 
             setMatch(current);
-            // Default to first stream server source if available
+            // Default to Server 2 (Sony Sports 1) which is 100% active and global on load
             if (current.servers && current.servers.length > 0) {
-              setActiveServer(current.servers[0]);
+              const defaultServer = current.servers.find((s) => s.id === 'secure-sony-2') || current.servers[0];
+              setActiveServer(defaultServer);
             }
             
             // Set other live matches for sidebar recommendations
