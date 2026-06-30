@@ -3,16 +3,25 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const streamUrl = searchParams.get('url');
+  const cookie = searchParams.get('cookie');
 
   if (!streamUrl) {
     return new Response('Missing url parameter', { status: 400 });
   }
 
   try {
+    // Construct request headers
+    const requestHeaders: Record<string, string> = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    };
+
+    // Forward the security cookie from the query parameters if present
+    if (cookie) {
+      requestHeaders['Cookie'] = cookie;
+    }
+
     const res = await fetch(streamUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      }
+      headers: requestHeaders
     });
 
     if (!res.ok) {
@@ -21,9 +30,9 @@ export async function GET(request: Request) {
 
     const contentType = res.headers.get('content-type') || '';
     const urlObj = new URL(streamUrl);
-    const queryString = urlObj.search; // Extract the query string containing token/auth data
+    const queryString = urlObj.search;
 
-    // If it's a playlist manifest (.m3u8), parse and rewrite segment URLs to also route through this proxy
+    // If it's a playlist manifest (.m3u8), parse and rewrite segment URLs to route through this proxy
     if (contentType.includes('mpegurl') || contentType.includes('x-mpegURL') || streamUrl.split('?')[0].endsWith('.m3u8')) {
       const text = await res.text();
       const baseUrl = streamUrl.substring(0, streamUrl.lastIndexOf('/') + 1);
@@ -40,8 +49,12 @@ export async function GET(request: Request) {
             absoluteUrl += queryString;
           }
           
-          // Route the segment/sub-playlist through our proxy
-          return `/api/stream-proxy?url=${encodeURIComponent(absoluteUrl)}`;
+          // Route the segment/sub-playlist through our proxy and forward the Cookie parameter
+          let proxyUrl = `/api/stream-proxy?url=${encodeURIComponent(absoluteUrl)}`;
+          if (cookie) {
+            proxyUrl += `&cookie=${encodeURIComponent(cookie)}`;
+          }
+          return proxyUrl;
         }
         return line;
       });

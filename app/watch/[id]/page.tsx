@@ -42,6 +42,7 @@ export default function WatchPage() {
           
           if (current) {
             // Fetch dynamic admin overrides for server URLs
+            let isTSportsOverridden = false;
             try {
               const configRes = await fetch('/api/config');
               if (configRes.ok) {
@@ -50,6 +51,9 @@ export default function WatchPage() {
                   const updatedServers = current.servers.map((srv) => {
                     const override = configData.streams.find((o: any) => o.id === srv.id);
                     if (override && override.url) {
+                      if (srv.id === 'local-tsports-1' && override.url !== srv.url) {
+                        isTSportsOverridden = true;
+                      }
                       return { ...srv, url: override.url };
                     }
                     return srv;
@@ -59,6 +63,39 @@ export default function WatchPage() {
               }
             } catch (err) {
               console.error('Error loading admin stream overrides:', err);
+            }
+
+            // Fetch official active T Sports link and cookies from GitHub repo if not overridden
+            if (!isTSportsOverridden) {
+              try {
+                const tsportsRes = await fetch('https://raw.githubusercontent.com/Gtajisan/iptv-TSports/main/TSports_m3u8_headers.Json');
+                if (tsportsRes.ok) {
+                  const tsportsData = await tsportsRes.json();
+                  if (tsportsData && tsportsData.channels && tsportsData.channels.length > 0) {
+                    const channel = tsportsData.channels[0];
+                    const streamUrl = channel.link;
+                    const cookieVal = channel.headers?.Cookie || channel.headers?.cookie;
+                    if (streamUrl && cookieVal) {
+                      const proxiedUrl = `/api/stream-proxy?url=${encodeURIComponent(streamUrl)}&cookie=${encodeURIComponent(cookieVal)}`;
+                      
+                      const updatedServers = current.servers.map((srv) => {
+                        if (srv.id === 'local-tsports-1') {
+                          return { 
+                            ...srv, 
+                            name: `Server 1 - T Sports HD (Official Live)`, 
+                            url: proxiedUrl,
+                            isGlobal: true 
+                          };
+                        }
+                        return srv;
+                      });
+                      current.servers = updatedServers;
+                    }
+                  }
+                }
+              } catch (err) {
+                console.error('Failed to load official TSports stream from GitHub:', err);
+              }
             }
 
             setMatch(current);
