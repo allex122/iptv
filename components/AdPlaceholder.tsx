@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import AdProvider from './AdProvider';
 
 interface AdPlaceholderProps {
   type: 'header' | 'sidebar' | 'overlay' | 'banner' | 'square';
@@ -32,10 +33,9 @@ export default function AdPlaceholder({ type, className = '' }: AdPlaceholderPro
   // If the admin has saved a custom iframe or script snippet, inject it
   if (!loading && dynamicAdHtml && dynamicAdHtml.trim() !== '') {
     return (
-      <div 
-        className={`flex justify-center items-center overflow-hidden w-full ${className}`}
-        dangerouslySetInnerHTML={{ __html: dynamicAdHtml }}
-      />
+      <div className={`flex justify-center items-center overflow-hidden w-full ${className}`}>
+        <AdProvider adCode={dynamicAdHtml} />
+      </div>
     );
   }
 
