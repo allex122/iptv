@@ -75,8 +75,16 @@ export const liveMatchStreams: StreamServer[] = [
     status: "ONLINE"
   },
   {
-    id: "secure-iframe-backup-10",
-    name: "Server 10 - Backup Livescore Feed (Iframe)",
+    id: "global-ptv-10",
+    name: "Server 10 - PTV Sports (Global Live)",
+    url: "http://198.195.239.50:8095/ptv/tracks-v1a1/mono.m3u8",
+    type: "hls",
+    isGlobal: true,
+    status: "ONLINE"
+  },
+  {
+    id: "secure-iframe-backup-11",
+    name: "Server 11 - Backup Livescore Feed (Iframe)",
     url: "https://www.scorebat.com/embed/livescore/",
     type: "iframe",
     isGlobal: true,
