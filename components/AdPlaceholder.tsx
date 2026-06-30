@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface AdPlaceholderProps {
   type: 'header' | 'sidebar' | 'overlay' | 'banner' | 'square';
@@ -8,6 +8,39 @@ interface AdPlaceholderProps {
 }
 
 export default function AdPlaceholder({ type, className = '' }: AdPlaceholderProps) {
+  const [dynamicAdHtml, setDynamicAdHtml] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load custom scripts dynamically from the Admin Dashboard configuration
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config');
+        const data = await res.json();
+        if (data && data.ads && data.ads[type]) {
+          setDynamicAdHtml(data.ads[type]);
+        }
+      } catch (err) {
+        console.error("Failed to load dynamic ad config:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadConfig();
+  }, [type]);
+
+  // If the admin has saved a custom iframe or script snippet, inject it
+  if (!loading && dynamicAdHtml && dynamicAdHtml.trim() !== '') {
+    return (
+      <div 
+        className={`flex justify-center items-center overflow-hidden w-full ${className}`}
+        dangerouslySetInnerHTML={{ __html: dynamicAdHtml }}
+      />
+    );
+  }
+
+  // Fallbacks: Show local premium placeholders if the admin has not set custom script codes
+  
   // 1. Header Banner Placeholder (Leaderboard 728x90)
   if (type === 'header') {
     return (
@@ -19,7 +52,7 @@ export default function AdPlaceholder({ type, className = '' }: AdPlaceholderPro
     );
   }
 
-  // 2. Sidebar Skyscraper Placeholder (No Iframes)
+  // 2. Sidebar Skyscraper Placeholder
   if (type === 'sidebar') {
     return (
       <div className={`flex flex-col bg-[#12141a] border border-[#20242e] rounded-2xl p-4 text-center w-full max-w-[320px] min-h-[300px] mx-auto justify-between ${className}`}>
@@ -40,7 +73,7 @@ export default function AdPlaceholder({ type, className = '' }: AdPlaceholderPro
     );
   }
 
-  // 3. Small Box Placeholder (No Iframes)
+  // 3. Small Box Placeholder
   if (type === 'square') {
     return (
       <div className={`flex flex-col bg-[#12141a] border border-[#20242e] rounded-xl p-3 text-center w-full max-w-[180px] mx-auto justify-between ${className}`}>
@@ -58,7 +91,7 @@ export default function AdPlaceholder({ type, className = '' }: AdPlaceholderPro
     );
   }
 
-  // 4. Wide Leaderboard Banner Placeholder (No Iframes)
+  // 4. Wide Leaderboard Banner Placeholder (800x250)
   return (
     <div className={`flex flex-col items-center justify-center bg-[#12141a] border border-[#20242e] rounded-3xl p-4 w-full max-w-[840px] mx-auto overflow-hidden ${className}`}>
       <span className="text-[8px] uppercase tracking-widest text-slate-500 font-bold mb-2 self-start pl-2">

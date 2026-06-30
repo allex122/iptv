@@ -1,0 +1,60 @@
+{
+  "ads": {
+    "header": "",
+    "sidebar": "",
+    "square": "",
+    "banner": ""
+  },
+  "streams": [
+    {
+      "id": "local-tsports-1",
+      "name": "Server 1 - T Sports HD (Subcontinent Server)",
+      "url": "http://10.45.45.254:8082/T-SPORTS-HD/tracks-v1a1/mono.m3u8?token=95956d581dd92f6c0c316a175507b966d19515e7-5a84e0a8c786f1a966e53be8e0ed09c6-1782770269-1782759469"
+    },
+    {
+      "id": "secure-sony-2",
+      "name": "Server 2 - Sony Sports 1 (Global HD)",
+      "url": "https://vcp.myplaytv.com/sonysports1/mono.m3u8"
+    },
+    {
+      "id": "secure-star-3",
+      "name": "Server 3 - Star Sports Select 1 (Global)",
+      "url": "https://bpprod6linear.akamaized.net/bpk-tv/irdeto_com_Channel_255/index.m3u8"
+    },
+    {
+      "id": "secure-cbc-4",
+      "name": "Server 4 - CBC Sport HD (UCL Feed)",
+      "url": "https://mn-nl.mncdn.com/cbcsports_live/cbcsports/playlist.m3u8"
+    },
+    {
+      "id": "secure-cctv-5",
+      "name": "Server 5 - CCTV-5 HD (World Cup Feed)",
+      "url": "https://node1.olelive.com:6443/live/CCTV5HD/hls.m3u8"
+    },
+    {
+      "id": "secure-orf-6",
+      "name": "Server 6 - ORF Sport + (Europe HD)",
+      "url": "https://orfs.mdn.ors.at/out/u/orfs/q8c/manifest.m3u8"
+    },
+    {
+      "id": "secure-bein-7",
+      "name": "Server 7 - beIN Sports XTRA (Global HD)",
+      "url": "https://bein-xtra-bein.amagi.tv/playlist.m3u8"
+    },
+    {
+      "id": "secure-cbs-8",
+      "name": "Server 8 - CBS Sports Golazo (Soccer HD)",
+      "url": "https://proped3fhg87.airspace-cdn.cbsivideo.com/golazo-live-dai/master/golazo-live-dai.m3u8"
+    },
+    {
+      "id": "secure-dazn-9",
+      "name": "Server 9 - DAZN Combat (Fight Sports)",
+      "url": "https://dazn-combat-rakuten.amagi.tv/hls/amagi_hls_data_rakutenAA-dazn-combat-rakuten/CDN/master.m3u8"
+    },
+    {
+      "id": "secure-iframe-backup-10",
+      "name": "Server 10 - Backup Livescore Feed (Iframe)",
+      "url": "https://www.scorebat.com/embed/livescore/"
+    }
+  ]
+}

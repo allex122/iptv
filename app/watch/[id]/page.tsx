@@ -41,6 +41,26 @@ export default function WatchPage() {
           const current = allMatches.find((m) => m.id === matchId);
           
           if (current) {
+            // Fetch dynamic admin overrides for server URLs
+            try {
+              const configRes = await fetch('/api/config');
+              if (configRes.ok) {
+                const configData = await configRes.json();
+                if (configData && configData.streams) {
+                  const updatedServers = current.servers.map((srv) => {
+                    const override = configData.streams.find((o: any) => o.id === srv.id);
+                    if (override && override.url) {
+                      return { ...srv, url: override.url };
+                    }
+                    return srv;
+                  });
+                  current.servers = updatedServers;
+                }
+              }
+            } catch (err) {
+              console.error('Error loading admin stream overrides:', err);
+            }
+
             setMatch(current);
             // Default to first stream server source if available
             if (current.servers && current.servers.length > 0) {
